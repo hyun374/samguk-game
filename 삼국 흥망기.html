@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼국 흥망기</title>
+<style>
+
+
+:root {
+  --bg: #F5F0E8;
+  --bg2: #EDE6D6;
+  --surface: #FFFFFF;
+  --border: #D4C5A9;
+  --border2: #E8DCC8;
+  --ink: #2C1F0E;
+  --ink2: #5C4A32;
+  --ink3: #8C7A62;
+  --gold: #A0722A;
+  --gold-light: #C8973A;
+  --gold-bg: #FDF5E4;
+  --red: #8B1A1A;
+  --blue: #1A3D6B;
+  --green: #2A5C1A;
+
+  --gg: #8B1A1A;
+  --gg-light: #C84040;
+  --gg-bg: #FDF0F0;
+  --bj: #1A3D6B;
+  --bj-light: #3A6FBB;
+  --bj-bg: #F0F4FD;
+  --sr: #2A5C1A;
+  --sr-light: #4A9A2A;
+  --sr-bg: #F0F8F0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+  min-height: 100vh;
+}
+
+/* 양피지 질감 배경 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.screen { position: relative; z-index: 1; display: none; min-height: 100vh; }
+.screen.active { display: block; }
+
+#intro.active { display: flex; flex-direction: column; align-items: center; }
+#game.active  { display: flex; flex-direction: column; align-items: center; }
+#ending.active{ display: flex; flex-direction: column; align-items: center; }
+
+/* ────────── 인트로 ────────── */
+#intro {
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+
+.intro-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.intro-title {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+.intro-title span {
+  color: var(--gold-light);
+}
+
+.intro-sub {
+  font-size: 0.9rem;
+  color: var(--ink3);
+  max-width: 440px;
+  line-height: 1.9;
+}
+
+.hr-deco {
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+}
+
+.nation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  max-width: 780px;
+  width: 100%;
+}
+
+.nc {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 1.8rem 1.4rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.nc::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+}
+.nc.gg::after { background: var(--gg-light); }
+.nc.bj::after { background: var(--bj-light); }
+.nc.sr::after { background: var(--sr-light); }
+
+.nc:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); border-color: var(--gold-light); }
+.nc.gg:hover { background: var(--gg-bg); }
+.nc.bj:hover { background: var(--bj-bg); }
+.nc.sr:hover { background: var(--sr-bg); }
+
+.nc-emoji { font-size: 2.4rem; margin-bottom: 0.8rem; }
+.nc-name {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+.nc.gg .nc-name { color: var(--gg); }
+.nc.bj .nc-name { color: var(--bj); }
+.nc.sr .nc-name { color: var(--sr); }
+
+.nc-trait {
+  font-size: 0.78rem;
+  color: var(--ink3);
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+}
+
+.nc-bars { display: flex; flex-direction: column; gap: 0.35rem; }
+.nc-bar-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.68rem; color: var(--ink3); }
+.nc-bar-track { flex: 1; height: 4px; background: var(--bg2); border-radius: 2px; overflow: hidden; }
+.nc-bar-fill { height: 100%; border-radius: 2px; }
+.nc.gg .nc-bar-fill { background: var(--gg-light); }
+.nc.bj .nc-bar-fill { background: var(--bj-light); }
+.nc.sr .nc-bar-fill { background: var(--sr-light); }
+
+/* ────────── 게임 화면 ────────── */
+#game {
+  padding: 1.5rem 1rem 3rem;
+  gap: 1rem;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+
+/* 게임 헤더 */
+.g-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1.4rem;
+}
+
+.g-nation {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.g-turn {
+  font-size: 0.78rem;
+  color: var(--ink3);
+  text-align: right;
+}
+.g-turn strong {
+  display: block;
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: 1rem;
+  color: var(--gold);
+}
+
+/* 자원 */
+.res-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+
+.res-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.res-label { font-size: 0.68rem; color: var(--ink3); margin-bottom: 0.35rem; letter-spacing: 0.03em; }
+.res-val {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+.res-track { width: 100%; height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+.res-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.rf-ms { background: linear-gradient(90deg, #C84040, #E87070); }
+.rf-ip { background: linear-gradient(90deg, #3A6FBB, #70A0E8); }
+.rf-gn { background: linear-gradient(90deg, #C87820, #E8A050); }
+.rf-jj { background: linear-gradient(90deg, #3A8A2A, #70C040); }
+.res-chg { font-size: 0.68rem; height: 1rem; margin-top: 0.2rem; transition: opacity 0.3s; }
+
+/* 이벤트 카드 */
+.ev-card {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ev-top {
+  padding: 0.5rem 1.4rem;
+  background: var(--gold-bg);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ev-tag {
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.ev-nation-tag {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+.ev-body { padding: 1.5rem 1.8rem; }
+.ev-era { font-size: 0.7rem; color: var(--ink3); margin-bottom: 0.4rem; letter-spacing: 0.05em; }
+.ev-title {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.9rem;
+}
+
+.ev-desc {
+  font-size: 0.875rem;
+  line-height: 1.85;
+  color: var(--ink2);
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--border);
+}
+
+.ev-q {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+
+/* 선택지 */
+.choices { display: flex; flex-direction: column; gap: 0.65rem; }
+
+.choice-btn {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 0.95rem 1.2rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+  transition: all 0.2s ease;
+  color: var(--ink);
+}
+.choice-btn:hover {
+  background: var(--gold-bg);
+  border-color: var(--gold-light);
+  transform: translateX(3px);
+  box-shadow: 2px 0 0 var(--gold-light);
+}
+.choice-lbl { font-size: 0.68rem; color: var(--gold); font-weight: 700; letter-spacing: 0.1em; display: block; margin-bottom: 0.25rem; }
+.choice-txt { font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
+.choice-fx { font-size: 0.7rem; color: var(--ink3); margin-top: 0.3rem; display: block; }
+
+/* 로그 */
+.log-box {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1.2rem;
+}
+.log-title { font-size: 0.68rem; color: var(--ink3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.log-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; max-height: 90px; overflow-y: auto; }
+.log-item { font-size: 0.73rem; color: var(--ink3); padding: 0.15rem 0; border-bottom: 1px solid var(--border2); }
+.log-t { color: var(--gold); font-weight: 700; margin-right: 0.4rem; }
+
+/* 결과 팝업 */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(44,31,14,0.45);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.overlay.show { display: flex; }
+
+.res-popup {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 2rem;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: popIn 0.28s ease;
+}
+@keyframes popIn { from { transform:scale(0.93); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+.res-popup-title { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif; font-size: 1rem; font-weight: 700; color: var(--gold); margin-bottom: 0.9rem; }
+.res-popup-desc { font-size: 0.875rem; line-height: 1.85; color: var(--ink2); margin-bottom: 0.5rem; }
+.res-popup-hist { font-size: 0.78rem; color: var(--ink3); background: var(--bg); border-radius: 4px; padding: 0.6rem 0.8rem; margin-bottom: 1.2rem; line-height: 1.7; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.4rem; }
+.tag { font-size: 0.73rem; padding: 0.25rem 0.7rem; border-radius: 20px; font-weight: 700; }
+.tag.pos { background: #EAF7E0; color: #2A7A10; border: 1px solid #B0E090; }
+.tag.neg { background: #FDEAEA; color: #8B1A1A; border: 1px solid #F0B0B0; }
+
+.next-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--ink);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.2s;
+}
+.next-btn:hover { background: var(--gold); }
+
+/* ────────── 결말 ────────── */
+#ending {
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+  gap: 1.4rem;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+
+.end-emoji { font-size: 3.5rem; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+.end-title {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.end-desc {
+  font-size: 0.9rem;
+  line-height: 1.9;
+  color: var(--ink2);
+  max-width: 480px;
+}
+
+.end-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.7rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.end-stat {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 0.6rem;
+  text-align: center;
+}
+.end-stat-label { font-size: 0.65rem; color: var(--ink3); margin-bottom: 0.3rem; }
+.end-stat-val { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif; font-size: 1.7rem; font-weight: 700; color: var(--ink); }
+
+/* 공통 선택 비교표 */
+.choice-summary {
+  width: 100%;
+  max-width: 500px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem 1.4rem;
+  text-align: left;
+}
+.cs-title { font-size: 0.72rem; color: var(--gold); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.cs-sub { font-size: 0.7rem; color: var(--ink3); margin-bottom: 0.9rem; }
+.cs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border2);
+}
+.cs-row:last-child { border-bottom: none; }
+.cs-event { font-size: 0.78rem; color: var(--ink2); flex: 1; }
+.cs-choice { text-align: right; }
+.cs-choice-lbl { font-size: 0.8rem; color: var(--gold); font-weight: 700; display: block; }
+.cs-choice-txt { font-size: 0.68rem; color: var(--ink3); }
+
+.end-reflection {
+  width: 100%;
+  max-width: 500px;
+  background: var(--gold-bg);
+  border: 1.5px solid var(--border2);
+  border-radius: 8px;
+  padding: 1.2rem 1.4rem;
+  text-align: left;
+}
+.ref-title { font-size: 0.72rem; color: var(--gold); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.ref-text { font-size: 0.875rem; color: var(--ink2); line-height: 1.85; }
+
+.restart-btn {
+  padding: 0.85rem 2.5rem;
+  background: transparent;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.restart-btn:hover { background: var(--ink); color: #fff; }
+
+@media (max-width: 600px) {
+  .nation-grid { grid-template-columns: 1fr; }
+  .res-row { grid-template-columns: repeat(2, 1fr); }
+  .end-stats { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- 인트로 -->
+<div id="intro" class="screen active">
+  <p class="intro-eyebrow">⚔ 중학교 역사 학습 게임</p>
+  <h1 class="intro-title">삼국 <span>흥망기</span></h1>
+  <div class="hr-deco"></div>
+  <p class="intro-sub">
+    나라를 다스리는 건 왕만이 아니다.<br>
+    매 순간 찾아오는 위기 앞에서 어떤 선택을 내리느냐에 따라<br>
+    백성의 삶이 달라지고, 나라의 운명이 갈린다.<br><br>
+    <strong>7턴 · 7번의 선택 · 역사를 직접 만들어봐.</strong>
+  </p>
+  <div class="hr-deco"></div>
+  <p style="font-size:0.8rem; color:var(--ink3); margin-bottom:0.3rem">나라를 선택하세요</p>
+  <div class="nation-grid">
+    <div class="nc gg" onclick="startGame('gg')">
+      <div class="nc-emoji">🏹</div>
+      <div class="nc-name">고구려</div>
+      <div class="nc-trait">동북아 최강 군사 국가.<br>압록강을 중심으로 성장.</div>
+      <div class="nc-bars">
+        <div class="nc-bar-row"><span style="width:3rem">민심</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:50%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">인구</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:60%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">군사력</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:80%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">재정</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:55%"></div></div></div>
+      </div>
+    </div>
+    <div class="nc bj" onclick="startGame('bj')">
+      <div class="nc-emoji">⛵</div>
+      <div class="nc-name">백제</div>
+      <div class="nc-trait">해상 교역 강국.<br>한강 유역에서 출발.</div>
+      <div class="nc-bars">
+        <div class="nc-bar-row"><span style="width:3rem">민심</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:65%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">인구</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:65%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">군사력</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:55%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">재정</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:70%"></div></div></div>
+      </div>
+    </div>
+    <div class="nc sr" onclick="startGame('sr')">
+      <div class="nc-emoji">🌾</div>
+      <div class="nc-name">신라</div>
+      <div class="nc-trait">늦게 피어난 나라.<br>외교와 내부 결속이 강점.</div>
+      <div class="nc-bars">
+        <div class="nc-bar-row"><span style="width:3rem">민심</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:70%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">인구</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:60%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">군사력</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:50%"></div></div></div>
+        <div class="nc-bar-row"><span style="width:3rem">재정</span><div class="nc-bar-track"><div class="nc-bar-fill" style="width:60%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 게임 -->
+<div id="game" class="screen">
+  <div class="g-header">
+    <div>
+      <div class="g-nation" id="gNation">고구려</div>
+      <div style="font-size:0.7rem;color:var(--ink3);margin-top:0.15rem" id="gEra"></div>
+    </div>
+    <div class="g-turn">
+      <strong id="gTurn">1 / 5 턴</strong>
+      <span>역사의 순간</span>
+    </div>
+  </div>
+
+  <div class="res-row">
+    <div class="res-card">
+      <div class="res-label">❤ 민심</div>
+      <div class="res-val" id="v-ms">60</div>
+      <div class="res-track"><div class="res-fill rf-ms" id="b-ms" style="width:60%"></div></div>
+      <div class="res-chg" id="c-ms"></div>
+    </div>
+    <div class="res-card">
+      <div class="res-label">👥 인구</div>
+      <div class="res-val" id="v-ip">60</div>
+      <div class="res-track"><div class="res-fill rf-ip" id="b-ip" style="width:60%"></div></div>
+      <div class="res-chg" id="c-ip"></div>
+    </div>
+    <div class="res-card">
+      <div class="res-label">⚔ 군사력</div>
+      <div class="res-val" id="v-gn">60</div>
+      <div class="res-track"><div class="res-fill rf-gn" id="b-gn" style="width:60%"></div></div>
+      <div class="res-chg" id="c-gn"></div>
+    </div>
+    <div class="res-card">
+      <div class="res-label">💰 재정</div>
+      <div class="res-val" id="v-jj">60</div>
+      <div class="res-track"><div class="res-fill rf-jj" id="b-jj" style="width:60%"></div></div>
+      <div class="res-chg" id="c-jj"></div>
+    </div>
+  </div>
+
+  <div class="ev-card">
+    <div class="ev-top">
+      <span class="ev-tag">📜 이번 턴의 상황</span>
+      <span class="ev-nation-tag" id="evNationTag"></span>
+    </div>
+    <div class="ev-body">
+      <div class="ev-era" id="evEra"></div>
+      <div class="ev-title" id="evTitle"></div>
+      <div class="ev-desc" id="evDesc"></div>
+      <div class="ev-q" id="evQ"></div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+
+  <div class="log-box">
+    <div class="log-title">📋 선택 기록</div>
+    <ul class="log-list" id="logList"></ul>
+  </div>
+</div>
+
+<!-- 결말 -->
+<div id="ending" class="screen">
+  <div class="end-emoji" id="endEmoji">🏛</div>
+  <h2 class="end-title" id="endTitle"></h2>
+  <p class="end-desc" id="endDesc"></p>
+  <div class="end-stats">
+    <div class="end-stat"><div class="end-stat-label">❤ 민심</div><div class="end-stat-val" id="e-ms">-</div></div>
+    <div class="end-stat"><div class="end-stat-label">👥 인구</div><div class="end-stat-val" id="e-ip">-</div></div>
+    <div class="end-stat"><div class="end-stat-label">⚔ 군사력</div><div class="end-stat-val" id="e-gn">-</div></div>
+    <div class="end-stat"><div class="end-stat-label">💰 재정</div><div class="end-stat-val" id="e-jj">-</div></div>
+  </div>
+  <div class="choice-summary">
+    <div class="cs-title">📋 내 핵심 선택</div>
+    <div class="cs-sub">공통 이벤트에서 내가 무엇을 골랐는지 — 옆 친구와 비교해봐</div>
+    <div id="csSummary"></div>
+  </div>
+  <div class="end-reflection">
+    <div class="ref-title">🤔 토의 질문</div>
+    <div class="ref-text" id="endRef"></div>
+  </div>
+  <button class="restart-btn" onclick="restart()">↩ 다시 선택하기</button>
+</div>
+
+<!-- 팝업 -->
+<div class="overlay" id="overlay">
+  <div class="res-popup">
+    <div class="res-popup-title" id="popTitle"></div>
+    <div class="res-popup-desc" id="popDesc"></div>
+    <div class="res-popup-hist" id="popHist"></div>
+    <div class="tags" id="popTags"></div>
+    <button class="next-btn" onclick="nextTurn()">다음 턴으로 →</button>
+  </div>
+</div>
+
+<script>
+// ───────── 데이터 ─────────
+
+const NATIONS = {
+  gg: { name:'고구려', color:'#8B1A1A', eras:['체제 정비기','위기 극복기','영토 확장기','동북아 강자'] },
+  bj: { name:'백제',   color:'#1A3D6B', eras:['한강 시대','위기와 천도','웅진 중흥기','사비 전성기'] },
+  sr: { name:'신라',   color:'#2A5C1A', eras:['소국 연합기','체제 정비기','동맹과 외교','한강 장악기'] }
+};
+
+const INIT_STATS = {
+  gg: { ms:50, ip:60, gn:80, jj:55 },
+  bj: { ms:65, ip:65, gn:55, jj:70 },
+  sr: { ms:70, ip:60, gn:50, jj:60 }
+};
+
+// 공통 이벤트 ID
+const COMMON_IDS = ['buddhism','hangang','invasion','yulyeong','sadae','drought','rebellion'];
+
+// 국가별 전용 이벤트
+const EXCLUSIVE = {
+  gg: ['jindaebeop','pyongyang','taehak','sosurim','gwanggaeto','gg_capital'],
+  bj: ['jeongsaam','baekje_trade','woongjin','goichiwang','geunchogo','sabi'],
+  sr: ['hwarang','jijeungwang','daegaya','beopheung','jinhung_hangang','gyeolsok']
+};
+
+const ALL_EVENTS = [
+  // ─── 공통 ───
+  {
+    id:'buddhism', nation:'common',
+    era:'새로운 사상의 도래',
+    title:'불교, 받아들일 것인가',
+    desc:'중국에서 승려가 찾아왔다. "부처님의 가르침으로 나라를 하나로 묶을 수 있다"고 한다. 왕실은 왕의 권위를 높이는 데 유리하다고 본다. 하지만 귀족들은 조상 대대로 내려온 전통 신앙을 지켜야 한다며 반발한다.',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'불교를 국가 공식 종교로 선포하고 절을 세운다.',
+        fx:{ms:+10,ip:+5,gn:0,jj:-8},
+        res:'"왕은 살아있는 부처"라는 논리가 퍼졌다. 왕권이 강화되고 백성들의 심리적 안정감이 높아졌다. 귀족들은 불만이지만 공개적으로 반발하지 못했다.',
+        hist:'→ 고구려 372년, 백제 384년, 신라 527년 불교를 공식 수용. 불교는 종교이자 왕권 강화의 도구였다.' },
+      { lbl:'선택 B', txt:'허용은 하되 국가 종교로는 삼지 않는다. 귀족들과 타협.',
+        fx:{ms:+3,ip:+2,gn:0,jj:0},
+        res:'갈등은 줄었다. 하지만 왕권 강화 효과도 없었다. 귀족들이 여전히 발언권을 유지했다.',
+        hist:'→ 애매한 결정은 아무도 만족시키지 못한다.' },
+      { lbl:'선택 C', txt:'전통 신앙을 고수한다. 불교 승려를 돌려보낸다.',
+        fx:{ms:+5,ip:0,gn:0,jj:+3},
+        res:'귀족들이 만족했다. 하지만 불교를 통해 들어오는 문자, 건축, 의학 등 선진 기술도 함께 차단됐다.',
+        hist:'→ 불교는 단순 종교가 아니라 동아시아 선진 문물의 통로였다.' }
+    ]
+  },
+  {
+    id:'hangang', nation:'common',
+    era:'한반도의 심장을 둘러싼 전쟁',
+    title:'한강 유역을 차지하라',
+    desc:'한강 유역은 농사짓기 좋고 바다로 나가기 유리한 최고의 땅이다. 지금 그 땅에는 다른 나라 사람들이 살고 있다. 전쟁을 벌이면 빼앗을 수 있지만, 그 땅의 사람들은 어떻게 될까?',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'대규모 군사 작전으로 완전히 점령한다.',
+        fx:{ms:-8,ip:+15,gn:+10,jj:+12},
+        res:'한강 유역을 차지했다. 농업 생산량이 급증하고 중국과 직접 교역할 수 있게 됐다. 하지만 전쟁에 동원된 백성들의 희생이 컸다.',
+        hist:'→ 삼국 모두 한강을 차지한 시기에 가장 강성했다. 한강은 단순한 땅이 아니라 동아시아 교역의 핵심 통로였다.' },
+      { lbl:'선택 B', txt:'외교와 동맹으로 천천히 흡수한다.',
+        fx:{ms:+10,ip:+8,gn:0,jj:+8},
+        res:'전쟁 없이 세력을 넓혔다. 시간이 걸리지만 그 땅 사람들이 저항 없이 통합됐다.',
+        hist:'→ 느리지만 갈등이 적다. 하지만 다른 나라가 먼저 차지할 위험이 있다.' },
+      { lbl:'선택 C', txt:'지금은 내부 안정이 먼저. 한강은 나중에.',
+        fx:{ms:+5,ip:+2,gn:+5,jj:+5},
+        res:'내부가 안정됐다. 하지만 다른 나라가 한강 유역을 먼저 차지하면 외교적으로도 불리해진다.',
+        hist:'→ 한강을 잃으면 중국과의 직접 교역로도 막힌다.' }
+    ]
+  },
+  {
+    id:'invasion', nation:'common',
+    era:'국경, 외적의 그림자',
+    title:'외적이 쳐들어왔다',
+    desc:'국경을 넘어 적이 마을을 불태우고 있다. 수도까지 위협받을 수 있다. 하지만 지금은 농번기다. 농민들을 전쟁에 끌고 가면 올가을 수확이 위태롭다.',
+    q:'→ 어떻게 대응하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'대규모 징집으로 즉각 격퇴한다.',
+        fx:{ms:-10,ip:-12,gn:+15,jj:-8},
+        res:'침입을 막아냈다. 하지만 전사자가 늘고 농사를 망쳐 그해 겨울 굶주리는 자가 생겼다.',
+        hist:'→ 4세기 선비족 침입으로 고구려 수도가 함락되기도 했다. 외침은 나라의 존망을 위협했다.' },
+      { lbl:'선택 B', txt:'귀족 군사력을 중심으로 방어한다. 농민 동원 최소화.',
+        fx:{ms:+5,ip:0,gn:+5,jj:-5},
+        res:'농사 피해는 줄었다. 하지만 귀족 군사력에 의존하다 보니 귀족의 발언권이 커졌다.',
+        hist:'→ 귀족 의존은 왕권 약화로 이어질 수 있다.' },
+      { lbl:'선택 C', txt:'외교로 시간을 벌고, 국경에 성을 쌓아 장기 방어.',
+        fx:{ms:+8,ip:+2,gn:+8,jj:-12},
+        res:'당장의 피해는 줄었고 장기적으로 방어력이 높아졌다. 하지만 재정이 크게 줄었다.',
+        hist:'→ 고구려의 산성 방어 체계는 훗날 수·당 침입을 막는 핵심이 됐다.' }
+    ]
+  },
+
+  // ─── 고구려 전용 ───
+  {
+    id:'jindaebeop', nation:'gg',
+    era:'봄, 굶주림이 찾아왔다',
+    title:'진대법을 시행할 것인가',
+    desc:'겨울이 길었다. 창고의 곡식이 바닥났고, 빚을 갚지 못한 농민들이 귀족의 노비가 되고 있다. 관청 앞에 굶주린 백성들이 모여들었다. 귀족들은 "국가가 개입하면 우리 이익이 침해된다"며 반발한다.',
+    q:'→ 어떻게 대응하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'봄부터 가을까지 관청 곡식을 빌려주고 겨울에 갚게 한다. (진대법 시행)',
+        fx:{ms:+15,ip:+10,gn:0,jj:-10},
+        res:'백성들이 굶주림을 넘겼다. 노비가 되는 사람이 줄었고 민심이 안정됐다. 귀족들은 불만이지만 백성들의 지지가 높아졌다.',
+        hist:'→ 고구려 고국천왕 194년. 진대법은 국가가 빈민을 직접 구제한 최초의 복지 제도다. 노비 증가를 막아 국가 세금 기반도 유지됐다.' },
+      { lbl:'선택 B', txt:'귀족들이 알아서 해결하게 둔다. 국가는 군사력 유지에 집중.',
+        fx:{ms:-15,ip:-10,gn:+5,jj:+5},
+        res:'귀족의 노비가 급증했다. 농민들의 원망이 높아졌고 일부는 도망쳐 인구가 줄었다. 세금 기반이 흔들리기 시작했다.',
+        hist:'→ 노비가 된 농민은 국가에 세금을 내지 않는다. 귀족은 이득이지만 나라 전체는 손해다.' },
+      { lbl:'선택 C', txt:'세금을 한시적으로 감면한다. 근본 해결보다 임시방편.',
+        fx:{ms:+8,ip:+5,gn:0,jj:-5},
+        res:'단기적 고통은 줄었지만 빚 문제는 해결되지 않았다. 내년에 또 같은 일이 반복될 수 있다.',
+        hist:'→ 임시방편. 제도적 해결 없이는 빈곤의 악순환이 반복된다.' }
+    ]
+  },
+  {
+    id:'pyongyang', nation:'gg',
+    era:'수도를 옮겨야 할까',
+    title:'장수왕의 남진 정책 — 평양 천도',
+    desc:'지금 수도 국내성은 귀족 세력이 너무 뿌리를 내렸다. 장수왕은 평양으로 수도를 옮기면 귀족을 약화시키고 남쪽으로 더 나아갈 수 있다고 생각한다. 하지만 평양으로 이주해야 하는 백성들과 귀족들이 반발한다.',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'평양으로 천도한다. 남진 정책의 발판을 마련한다.',
+        fx:{ms:-8,ip:-5,gn:+12,jj:-10},
+        res:'수도를 옮겼다. 귀족 세력이 약해졌고 남쪽 진출이 용이해졌다. 이후 백제 한성을 공격해 한강 유역까지 진출했다. 이주 과정에서 백성들의 혼란이 컸다.',
+        hist:'→ 고구려 427년 평양 천도. 이후 장수왕은 475년 백제 한성을 함락시켰다. 고구려는 한반도 중부까지 영토를 넓혔다.' },
+      { lbl:'선택 B', txt:'수도는 유지하되, 평양에 별궁을 짓고 전진 기지로 활용.',
+        fx:{ms:+5,ip:+2,gn:+8,jj:-8},
+        res:'혼란 없이 남쪽 진출 준비를 마쳤다. 하지만 귀족 세력은 여전히 강하다.',
+        hist:'→ 점진적 방식. 충돌은 줄지만 변화도 느리다.' },
+      { lbl:'선택 C', txt:'남진보다 북방 안정이 먼저다. 지금은 내부를 다진다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+5},
+        res:'내부가 안정됐다. 하지만 한강 유역 진출 기회를 놓칠 수 있다.',
+        hist:'→ 안정적이지만 팽창 기회를 놓치는 선택이다.' }
+    ]
+  },
+  {
+    id:'taehak', nation:'gg',
+    era:'인재를 키워야 한다',
+    title:'태학을 세울 것인가',
+    desc:'나라가 커질수록 행정을 담당할 관리가 필요하다. 소수림왕은 국립 교육 기관인 태학을 세우자고 한다. 귀족들은 환영하지만, 평민 자제들도 입학할 수 있어야 한다는 의견이 나왔다.',
+    q:'→ 어떻게 운영하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'태학을 세우되 귀족 자제만 입학 가능하게 한다.',
+        fx:{ms:+5,ip:+3,gn:+8,jj:-8},
+        res:'훈련된 관리들이 생겼다. 행정이 체계적이 됐다. 하지만 귀족 세력이 더욱 공고해졌다.',
+        hist:'→ 고구려 소수림왕 372년 태학 설립. 율령·불교와 함께 중앙 집권 체제 정비의 핵심이었다.' },
+      { lbl:'선택 B', txt:'태학 입학 자격을 평민 자제에게도 열어준다.',
+        fx:{ms:+15,ip:+5,gn:+5,jj:-10},
+        res:'백성들의 열기가 뜨거워졌다. 유능한 인재들이 나왔지만 귀족들이 강하게 반발했다.',
+        hist:'→ 삼국 시대는 아직 신분제가 강한 시대였다. 이 선택은 역사를 앞서간 것이다.' },
+      { lbl:'선택 C', txt:'당장 태학보다 군사 훈련소가 더 필요하다.',
+        fx:{ms:0,ip:0,gn:+15,jj:-5},
+        res:'군사력이 강해졌다. 하지만 행정 관리 부족으로 나라 운영이 점점 어려워졌다.',
+        hist:'→ 군사력만으로는 나라를 오래 유지할 수 없다.' }
+    ]
+  },
+
+  // ─── 백제 전용 ───
+  {
+    id:'jeongsaam', nation:'bj',
+    era:'귀족들의 목소리가 너무 크다',
+    title:'정사암 회의 — 귀족과 어떻게 나눌까',
+    desc:'백제의 귀족들은 정사암이라는 바위 위에 모여 나라의 중요한 일을 함께 결정해왔다. 왕이 혼자 결정하는 것보다 귀족들과 함께하는 전통이다. 하지만 왕은 귀족들의 영향력이 너무 커지고 있다고 느낀다.',
+    q:'→ 어떻게 할 것인가?',
+    choices:[
+      { lbl:'선택 A', txt:'정사암 회의를 계속 유지한다. 귀족과의 협력이 중요하다.',
+        fx:{ms:+8,ip:+3,gn:0,jj:+5},
+        res:'귀족들이 협력했다. 나라 운영이 안정됐다. 하지만 왕의 단독 결정권이 약하다.',
+        hist:'→ 백제는 삼국 중 귀족 합의제가 가장 발달했다. 정사암 회의는 귀족 세력이 강한 백제 정치의 특징이다.' },
+      { lbl:'선택 B', txt:'율령을 만들어 왕의 결정권을 법으로 보장한다.',
+        fx:{ms:+5,ip:+2,gn:+5,jj:+8},
+        res:'법으로 왕권을 강화했다. 귀족들이 불만이지만 공개 저항은 못 했다.',
+        hist:'→ 고이왕 때 6좌평 제도와 관복 색 구분으로 통치 체계를 정비했다.' },
+      { lbl:'선택 C', txt:'귀족들을 지방으로 분산 배치해 중앙 영향력을 줄인다.',
+        fx:{ms:+3,ip:+2,gn:+8,jj:-5},
+        res:'귀족의 중앙 집중이 줄었다. 하지만 지방 귀족들이 독자 세력화할 위험도 생겼다.',
+        hist:'→ 무령왕의 22담로 설치처럼 지방 통제를 강화한 방식이다.' }
+    ]
+  },
+  {
+    id:'baekje_trade', nation:'bj',
+    era:'바다 너머의 세계',
+    title:'근초고왕의 해상 외교 — 누구와 손잡을까',
+    desc:'백제는 바다를 이용한 교역이 강점이다. 중국 동진, 왜(일본), 가야와 모두 교류 가능하다. 하지만 고구려가 강해지면서 외교 방향을 정해야 한다. 누구와 손을 잡으면 고구려를 견제할 수 있을까?',
+    q:'→ 외교 방향을 결정하라.',
+    choices:[
+      { lbl:'선택 A', txt:'중국 동진·왜와 동시에 교역하며 고구려를 외교적으로 고립시킨다.',
+        fx:{ms:+8,ip:+5,gn:+5,jj:+15},
+        res:'선진 문물이 들어왔다. 재정이 크게 늘었다. 고구려를 외교적으로 압박하는 데 성공했다.',
+        hist:'→ 근초고왕 시기 백제는 동진·왜와 교류하며 고구려를 견제했다. 칠지도를 왜에 보낸 것이 이때다.' },
+      { lbl:'선택 B', txt:'신라와 동맹을 맺어 고구려에 함께 대항한다. (나제 동맹)',
+        fx:{ms:+10,ip:+5,gn:+10,jj:+5},
+        res:'고구려의 압박에 함께 저항할 수 있게 됐다. 하지만 동맹은 상황에 따라 언제든 깨질 수 있다.',
+        hist:'→ 나제 동맹(433년). 고구려 위협 앞에 백제와 신라가 손을 잡았다. 하지만 진흥왕 때 신라가 배신했다.' },
+      { lbl:'선택 C', txt:'독자 노선. 교역보다 내부 체계 정비에 집중.',
+        fx:{ms:+5,ip:+3,gn:+5,jj:0},
+        res:'내부가 안정됐다. 하지만 고구려를 외교적으로 견제할 수단이 줄었다.',
+        hist:'→ 고립은 안정적이지만, 강한 이웃 나라가 있을 때는 위험하다.' }
+    ]
+  },
+  {
+    id:'woongjin', nation:'bj',
+    era:'수도가 함락됐다',
+    title:'웅진 천도 — 위기를 기회로',
+    desc:'고구려 장수왕의 공격으로 수도 한성이 함락됐다. 개로왕이 전사했다. 백제는 새 수도 웅진(공주)으로 도망치듯 옮겼다. 귀족들의 권력 다툼으로 왕권이 약해졌다. 이 위기를 어떻게 극복할까?',
+    q:'→ 중흥 방향을 결정하라.',
+    choices:[
+      { lbl:'선택 A', txt:'신라 왕실과 혼인 동맹을 맺어 고구려에 맞선다.',
+        fx:{ms:+8,ip:+5,gn:+10,jj:+3},
+        res:'고구려 압박을 함께 견뎌냈다. 하지만 동맹은 신라의 이익에 따라 언제든 흔들릴 수 있다.',
+        hist:'→ 동성왕이 신라 왕실과 혼인 관계를 맺어 위기를 극복하려 했다.' },
+      { lbl:'선택 B', txt:'22담로를 설치해 왕족을 지방에 파견, 왕권을 회복한다.',
+        fx:{ms:+5,ip:+3,gn:+8,jj:-5},
+        res:'왕권이 안정됐다. 지방 통제가 강화되고 귀족 세력이 약해졌다.',
+        hist:'→ 무령왕의 22담로 설치. 백제 중흥의 핵심 정책이었다.' },
+      { lbl:'선택 C', txt:'중국 남조와의 교역을 재개해 문화·경제 기반을 회복한다.',
+        fx:{ms:+10,ip:+5,gn:0,jj:+12},
+        res:'선진 문물이 들어왔다. 재정이 회복됐다. 무령왕릉에 중국 문물이 가득한 이유가 여기 있다.',
+        hist:'→ 무령왕릉에서 중국 동전, 중국식 벽돌이 발견됐다. 대외 교류가 중흥의 발판이었다.' }
+    ]
+  },
+
+  // ─── 신라 전용 ───
+  {
+    id:'hwarang', nation:'sr',
+    era:'젊은이들을 어떻게 키울까',
+    title:'화랑도 — 인재 양성의 방법',
+    desc:'신라에는 화랑이라는 귀족 청소년 단체가 있다. 함께 무예를 익히고 노래하고 산천을 돌아다니며 심신을 단련한다. 진흥왕은 이것을 국가 조직으로 공식화하여 인재를 키우자고 한다.',
+    q:'→ 화랑도를 어떻게 운영하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'화랑도를 국가 공식 조직으로 편성. 군사 훈련에 집중.',
+        fx:{ms:+10,ip:+5,gn:+15,jj:-5},
+        res:'뛰어난 무인들이 배출됐다. 공동체 정신이 강해졌다. 이후 삼국 통일 전쟁에서 화랑 출신 장수들이 활약했다.',
+        hist:'→ 화랑도는 진흥왕 때 국가 조직이 됐다. 김유신, 관창 등 삼국 통일의 주역들이 화랑 출신이다.' },
+      { lbl:'선택 B', txt:'화랑도에 평민 자제도 참여할 수 있게 문호를 연다.',
+        fx:{ms:+15,ip:+5,gn:+8,jj:-3},
+        res:'백성들의 참여 열기가 높아졌다. 신라 전체의 결속력이 강해졌다.',
+        hist:'→ 화랑은 귀족 출신이지만, 낭도(따르는 무리)는 평민도 포함됐다.' },
+      { lbl:'선택 C', txt:'화랑 전통은 유지하되 국가가 직접 관여하지 않는다.',
+        fx:{ms:+5,ip:+2,gn:+5,jj:+3},
+        res:'자율성이 유지됐다. 하지만 조직화된 군사력 양성 효과는 약하다.',
+        hist:'→ 국가 조직화 없이는 체계적인 인재 양성이 어렵다.' }
+    ]
+  },
+  {
+    id:'jijeungwang', nation:'sr',
+    era:'나라의 이름을 정해야 한다',
+    title:'지증왕의 개혁 — 신라라는 이름',
+    desc:'지증왕이 즉위했다. 나라 이름도 왕 칭호도 정비되지 않았다. 지금까지 왕을 부르는 말이 "마립간", "이사금" 등 다양했다. 중국식으로 "왕"이라 칭하고 나라 이름을 "신라"로 정해야 한다는 의견이 나왔다.',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'나라 이름을 "신라"로, 왕 칭호를 중국식 "왕"으로 공식화한다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+5},
+        res:'나라의 정체성이 명확해졌다. 중국·다른 나라와의 외교에서도 대등하게 인정받을 수 있게 됐다.',
+        hist:'→ 지증왕 503년. "신라(新羅)"는 "덕업이 날로 새로워지고 사방을 망라한다"는 의미다. 이후 법흥왕이 율령·불교로 체계를 완성했다.' },
+      { lbl:'선택 B', txt:'전통 칭호를 유지한다. 정체성을 지킨다.',
+        fx:{ms:+5,ip:0,gn:0,jj:+3},
+        res:'귀족들이 편안해했다. 하지만 외교에서 다른 나라보다 격이 낮아 보일 수 있다.',
+        hist:'→ 신라는 삼국 중 가장 늦게 "왕" 칭호를 사용했다.' },
+      { lbl:'선택 C', txt:'이름보다 영토가 먼저다. 우산국(울릉도)부터 정복한다.',
+        fx:{ms:+5,ip:+5,gn:+10,jj:-5},
+        res:'우산국을 복속시켜 영토를 넓혔다. 이사부 장군이 나무사자로 항복을 받아냈다.',
+        hist:'→ 지증왕 512년, 이사부가 우산국을 정복했다. 울릉도는 오늘날까지 한국 영토다.' }
+    ]
+  },
+  {
+    id:'daegaya', nation:'sr',
+    era:'남쪽 가야를 어떻게 할까',
+    title:'진흥왕의 선택 — 가야를 삼켜라',
+    desc:'진흥왕이 즉위했다. 낙동강 서쪽에는 가야 연맹이 있다. 가야는 철 생산이 풍부하고 해상 교역이 발달했다. 군사적으로 정복할 수도 있고, 협상으로 흡수할 수도 있다.',
+    q:'→ 어떻게 가야를 통합하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'금관가야부터 시작해 군사적으로 병합한다.',
+        fx:{ms:-5,ip:+10,gn:+10,jj:+12},
+        res:'가야의 철 생산지와 해상 교역로를 차지했다. 하지만 가야 사람들의 저항이 이어졌다.',
+        hist:'→ 금관가야 532년, 대가야 562년 신라에 병합. 신라는 가야의 철기 기술과 가야금을 흡수했다.' },
+      { lbl:'선택 B', txt:'가야 지배층을 신라 귀족으로 편입시키고 자율성을 보장한다.',
+        fx:{ms:+10,ip:+8,gn:+5,jj:+8},
+        res:'가야 사람들의 저항이 줄었다. 가야 문화와 기술이 신라에 자연스럽게 흡수됐다.',
+        hist:'→ 가야 왕족들은 신라 귀족으로 편입됐다. 김유신의 가문도 금관가야 왕족 출신이다.' },
+      { lbl:'선택 C', txt:'가야보다 백제와의 동맹 강화가 더 중요하다.',
+        fx:{ms:+5,ip:+2,gn:+8,jj:+3},
+        res:'백제와 협력해 고구려를 압박할 수 있게 됐다. 하지만 가야는 나중에 처리해야 한다.',
+        hist:'→ 진흥왕은 초기에 백제 성왕과 함께 고구려를 공격했다가 이후 한강을 차지하며 배신했다.' }
+    ]
+  }
+
+  // ─── 공통 추가 ───
+  ,{
+    id:'yulyeong', nation:'common',
+    era:'법이 없으면 나라가 없다',
+    title:'율령을 반포하라',
+    desc:'나라가 커질수록 규칙이 필요하다. 지금은 왕의 말 한마디가 곧 법이다. 귀족들은 자기 마음대로 세금을 걷고 형벌을 내린다. 모든 사람에게 동일하게 적용되는 법을 만들자는 의견이 나왔다.',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'율령을 만들어 귀족·백성 모두에게 동일하게 적용한다.',
+        fx:{ms:+12,ip:+5,gn:0,jj:+8},
+        res:'법 앞에 귀족도 함부로 못 하게 됐다. 왕의 권위가 높아지고 백성들의 억울함이 줄었다. 하지만 귀족들의 반발이 거세다.',
+        hist:'→ 삼국 모두 율령 반포로 중앙 집권을 강화했다. 고구려 소수림왕(373), 백제 고이왕, 신라 법흥왕(520). 율령은 왕권 강화의 핵심 수단이었다.' },
+      { lbl:'선택 B', txt:'귀족에게는 예외를 두어 반발을 줄인다.',
+        fx:{ms:+5,ip:+2,gn:0,jj:+3},
+        res:'갈등은 줄었다. 하지만 법이 있으나 마나인 상황이 됐다. 힘 있는 자는 법 위에 있다.',
+        hist:'→ 법의 형평성 없이는 진정한 중앙 집권이 이루어지지 않는다.' },
+      { lbl:'선택 C', txt:'지금은 군사력이 먼저다. 율령은 나중에.',
+        fx:{ms:-3,ip:0,gn:+10,jj:-3},
+        res:'군사력이 강해졌다. 하지만 내부 질서 없이는 언제 반란이 일어날지 모른다.',
+        hist:'→ 군사력과 법 질서는 함께 갖춰야 나라가 안정된다.' }
+    ]
+  },
+  {
+    id:'sadae', nation:'common',
+    era:'강대국 중국의 압박',
+    title:'중국 황제가 조공을 요구한다',
+    desc:'중국의 황제가 사신을 보냈다. 조공을 바치면 선진 문물과 외교적 지위를 얻는다. 거절하면 자존심은 지키지만 적이 될 수 있다.',
+    q:'→ 어떻게 대응하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'조공을 바친다. 실리를 택한다.',
+        fx:{ms:-5,ip:+3,gn:0,jj:+10},
+        res:'중국으로부터 책봉을 받고 외교적 지위를 인정받았다. 선진 문물도 들어왔다. 하지만 일부 귀족들이 굴욕이라며 반발했다.',
+        hist:'→ 삼국은 모두 중국과 조공·책봉 관계를 맺었다. 이는 굴욕이 아니라 실리 외교였다. 책봉을 받으면 국제적으로 왕권을 인정받는 효과가 있었다.' },
+      { lbl:'선택 B', txt:'거절한다. 자주성을 지킨다.',
+        fx:{ms:+8,ip:0,gn:+5,jj:-5},
+        res:'백성들의 자부심이 높아졌다. 하지만 중국과의 교역이 끊기고 외교적으로 고립될 위험이 생겼다.',
+        hist:'→ 고구려는 때로 중국과 맞서 싸웠다. 광개토 대왕은 독자 연호 "영락"을 사용하며 중국과 대등함을 표방했다.' },
+      { lbl:'선택 C', txt:'형식만 갖추고 실질적 독립을 유지한다.',
+        fx:{ms:+3,ip:+2,gn:+2,jj:+5},
+        res:'겉으로는 조공하지만 실질적으로 독자 노선을 걷는다.',
+        hist:'→ 대부분의 삼국 외교가 이런 방식이었다. 명분과 실리를 동시에 챙기는 전략이다.' }
+    ]
+  },
+  {
+    id:'drought', nation:'common',
+    era:'하늘이 노했다',
+    title:'3년째 가뭄이 계속된다',
+    desc:'3년째 비가 오지 않는다. 곡식이 타들어가고 창고의 비축 식량도 바닥을 보인다. 백성들은 왕이 덕이 없어서 하늘이 벌을 내린다고 수군댄다.',
+    q:'→ 어떻게 대응하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'왕이 직접 하늘에 제사를 지내고 창고를 열어 백성에게 나눠준다.',
+        fx:{ms:+12,ip:+8,gn:0,jj:-12},
+        res:'백성들의 신뢰가 회복됐다. 왕이 우리를 챙긴다는 인식이 퍼졌다. 하지만 국가 재정이 크게 줄었다.',
+        hist:'→ 고대 왕은 하늘과 백성 사이의 중간자였다. 재해 때 창고를 여는 것은 왕의 기본 의무로 여겨졌다.' },
+      { lbl:'선택 B', txt:'세금 징수를 강화해 부족한 식량을 메운다.',
+        fx:{ms:-15,ip:-8,gn:+5,jj:+5},
+        res:'국가 재정은 유지됐다. 하지만 가뭄에 세금까지 내야 하는 백성들의 원망이 극에 달했다.',
+        hist:'→ 가뭄에 세금을 올리면 민심을 잃는다. 역사 속 많은 왕조가 이 실수로 무너졌다.' },
+      { lbl:'선택 C', txt:'수리 시설을 긴급 건설해 장기적 가뭄 대비 체계를 만든다.',
+        fx:{ms:+5,ip:+3,gn:0,jj:-8},
+        res:'단기적 고통은 있지만 장기적으로 농업 생산력이 높아졌다.',
+        hist:'→ 삼국 시대에는 저수지, 수로 등 수리 시설 건설이 활발했다. 농업 기반을 강화하는 장기 투자였다.' }
+    ]
+  },
+  {
+    id:'rebellion', nation:'common',
+    era:'내부의 적',
+    title:'귀족이 반란을 일으켰다',
+    desc:'지방 귀족이 왕의 명령을 거부하고 독립을 선언했다. 자기 땅의 농민들을 모아 군대를 만들었다. 이대로 두면 다른 귀족들도 따라 할 수 있다.',
+    q:'→ 어떻게 진압하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'즉각 군사를 보내 강력하게 진압한다.',
+        fx:{ms:+5,ip:-8,gn:+10,jj:-8},
+        res:'반란을 진압했다. 다른 귀족들이 두려워하며 복종했다. 하지만 전투 과정에서 백성들의 희생이 컸다.',
+        hist:'→ 강력한 진압은 단기적 안정을 가져오지만 백성의 피해가 크다.' },
+      { lbl:'선택 B', txt:'협상으로 반란 귀족을 회유한다. 일부 자치권을 인정한다.',
+        fx:{ms:+8,ip:+2,gn:0,jj:-3},
+        res:'피 흘리지 않고 해결했다. 하지만 왕권의 약함을 보여준 셈이라 다른 귀족들도 비슷한 요구를 할 수 있다.',
+        hist:'→ 타협은 평화적이지만 왕권을 약화시킬 수 있다.' },
+      { lbl:'선택 C', txt:'반란 귀족의 땅 백성들에게 세금 감면을 약속해 민심을 분리시킨다.',
+        fx:{ms:+12,ip:+5,gn:+5,jj:-5},
+        res:'백성들이 귀족을 떠나 왕에게 돌아왔다. 귀족은 고립되어 저절로 무너졌다.',
+        hist:'→ 백성의 민심을 얻는 자가 권력을 갖는다. 영리한 왕권 강화 전략이다.' }
+    ]
+  },
+
+  // ─── 고구려 추가 ───
+  ,{
+    id:'sosurim', nation:'gg',
+    era:'위기 이후의 재건',
+    title:'소수림왕의 세 가지 과제',
+    desc:'선비족 침입으로 고국원왕이 전사했다. 새로 즉위한 소수림왕 앞에 세 가지 과제가 놓였다. 불교 수용, 태학 설립, 율령 반포. 동시에 다 할 수 없다면 무엇을 먼저 할까?',
+    q:'→ 우선순위를 정하라.',
+    choices:[
+      { lbl:'선택 A', txt:'불교 수용부터. 민심 통합이 먼저다.',
+        fx:{ms:+15,ip:+5,gn:0,jj:-5},
+        res:'백성들의 심리적 안정감이 높아졌다. 왕권의 신성함이 강화됐다.',
+        hist:'→ 소수림왕은 372년 불교 수용, 태학 설립, 373년 율령 반포를 단행했다. 이 세 가지가 고구려 중앙 집권의 토대가 됐다.' },
+      { lbl:'선택 B', txt:'율령 반포부터. 법질서로 혼란을 잡는다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+8},
+        res:'법 질서가 잡혔다. 귀족들의 임의적 행동이 줄었다.',
+        hist:'→ 율령은 체계적 통치의 기본이다. 어떤 순서든 세 가지를 모두 해낸 소수림왕의 리더십이 핵심이다.' },
+      { lbl:'선택 C', txt:'태학 설립부터. 나라를 운영할 인재가 없으면 소용없다.',
+        fx:{ms:+5,ip:+3,gn:+8,jj:-8},
+        res:'교육받은 관리들이 배출됐다. 장기적으로 효과적이지만 당장의 혼란은 계속됐다.',
+        hist:'→ 태학은 고구려 최초의 국립 교육 기관이다. 유교 경전과 역사를 가르쳐 관리를 양성했다.' }
+    ]
+  },
+  {
+    id:'gwanggaeto', nation:'gg',
+    era:'4세기 말, 팽창의 시대',
+    title:'광개토 대왕의 정복 방향',
+    desc:'광개토 대왕이 즉위했다. 독자 연호 "영락"을 사용하며 천하의 중심임을 선포했다. 백제, 신라, 거란, 숙신, 후연... 사방에 상대가 있다. 어디부터 공략할까?',
+    q:'→ 정복 방향을 결정하라.',
+    choices:[
+      { lbl:'선택 A', txt:'남쪽 백제를 공격해 한강 이북을 차지한다.',
+        fx:{ms:-5,ip:+12,gn:+15,jj:+10},
+        res:'백제 아신왕의 항복을 받아냈다. 한강 이북을 차지하고 신라에도 영향력을 행사했다.',
+        hist:'→ 광개토 대왕릉비에 "백잔(백제)과 신라는 예부터 복속된 백성"이라 새겼다. 대왕은 백제 58성을 빼앗고, 신라에 침입한 왜도 물리쳤다.' },
+      { lbl:'선택 B', txt:'북쪽 거란·숙신·후연을 먼저 제압해 배후를 안정시킨다.',
+        fx:{ms:+5,ip:+8,gn:+12,jj:-8},
+        res:'북방이 안정됐다. 만주 지역을 장악하며 동북아 강자로 자리매김했다.',
+        hist:'→ 광개토 대왕은 거란, 숙신, 후연을 격파하며 만주 대부분을 차지했다. 고구려 최대 영토는 이때 형성됐다.' },
+      { lbl:'선택 C', txt:'왜의 공격을 받는 신라를 도와 남부에 영향력을 심는다.',
+        fx:{ms:+10,ip:+5,gn:+8,jj:-5},
+        res:'신라가 고구려에 의존하게 됐다. 낙동강까지 영향력이 미쳤다. 금관가야가 큰 타격을 입었다.',
+        hist:'→ 400년 보병·기병 5만을 보내 왜를 물리치고 신라를 도왔다. 충주 고구려비에 신라왕을 동이매금이라 낮춰 부른 기록이 남아 있다.' }
+    ]
+  },
+  {
+    id:'gg_capital', nation:'gg',
+    era:'5세기, 남진의 꿈',
+    title:'장수왕 — 평양으로 천도할 것인가',
+    desc:'장수왕이 즉위했다. 기존 수도 국내성은 귀족들이 뿌리 깊게 박혀 있다. 평양은 대동강 유역의 넓은 평야를 끼고 있어 농업과 해상 진출에 유리하다.',
+    q:'→ 천도할 것인가?',
+    choices:[
+      { lbl:'선택 A', txt:'평양으로 천도한다. 귀족 세력을 약화시키고 남진 기반을 만든다.',
+        fx:{ms:-8,ip:-5,gn:+12,jj:-10},
+        res:'평양으로 수도를 옮겼다(427). 이후 백제 한성을 공격해 개로왕을 전사시키고 한강 유역을 차지했다(475).',
+        hist:'→ 장수왕의 평양 천도는 남진 정책의 선포였다. 충주 고구려비는 고구려가 한반도 중부까지 영토를 넓혔음을 보여준다.' },
+      { lbl:'선택 B', txt:'천도 대신 평양에 행정 중심지를 두어 점진적으로 전환한다.',
+        fx:{ms:+3,ip:+2,gn:+5,jj:-5},
+        res:'혼란 없이 서서히 전환이 이루어졌다. 하지만 귀족들이 여전히 강한 영향력을 유지했다.',
+        hist:'→ 점진적 방식은 충돌을 줄이지만 변화가 느리다.' },
+      { lbl:'선택 C', txt:'천도하지 않는다. 국내성 기반을 유지한다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+5},
+        res:'안정을 유지했다. 하지만 남진 기회를 놓쳤고 귀족들의 영향력이 계속됐다.',
+        hist:'→ 현상 유지는 안전하지만 변화를 만들지 못한다.' }
+    ]
+  },
+
+  // ─── 백제 추가 ───
+  ,{
+    id:'goichiwang', nation:'bj',
+    era:'3세기, 체제 정비',
+    title:'고이왕의 관료제 — 6좌평 제도',
+    desc:'백제가 빠르게 성장하고 있다. 고이왕이 관리의 등급을 6좌평으로 나누고, 등급에 따라 관복 색을 달리하자고 한다. 체계적 행정이 가능해지지만 귀족들은 자기 등급이 낮아질까 불안해한다.',
+    q:'→ 관료 체계를 어떻게 정비할까?',
+    choices:[
+      { lbl:'선택 A', txt:'6좌평 제도를 시행하고 관복 색으로 등급을 명확히 구분한다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+10},
+        res:'행정이 체계적이 됐다. 관리들의 역할이 명확해지고 국가 운영이 효율적으로 바뀌었다.',
+        hist:'→ 6좌평: 내신·내두·내법·위사·조정·병관 좌평. 각각 왕명 출납, 재정, 예법, 경호, 형벌, 군사를 담당했다. 백제 관료제의 기초가 됐다.' },
+      { lbl:'선택 B', txt:'등급은 만들되, 귀족들의 기존 권한을 보장한다.',
+        fx:{ms:+5,ip:+2,gn:0,jj:+5},
+        res:'갈등 없이 제도가 안착됐다. 하지만 왕의 실질적 통제력이 약하다.',
+        hist:'→ 타협적 개혁은 저항을 줄이지만 효과도 줄어든다.' },
+      { lbl:'선택 C', txt:'관복보다 군사 조직 정비가 먼저다.',
+        fx:{ms:0,ip:0,gn:+15,jj:-5},
+        res:'군사력이 강해졌다. 하지만 행정 체계 없이는 강한 군사력도 지속하기 어렵다.',
+        hist:'→ 군사력과 행정 체계는 함께 갖춰야 강한 나라가 된다.' }
+    ]
+  },
+  {
+    id:'geunchogo', nation:'bj',
+    era:'4세기, 전성기',
+    title:'근초고왕 — 고구려를 공격하라',
+    desc:'근초고왕 시기, 백제가 가장 강하다. 남쪽으로는 마한 세력을 복속시켰다. 이제 북쪽 고구려를 공격할 기회다. 고구려가 약해진 틈을 노려 황해도까지 영토를 넓힐 수 있다.',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'선제공격한다. 고구려가 약할 때 치는 것이 전략이다.',
+        fx:{ms:+5,ip:-5,gn:+15,jj:+8},
+        res:'고구려 고국원왕을 전사시켰다(371). 황해도 일부를 차지했다. 백제 역사상 최대 영토 달성.',
+        hist:'→ 근초고왕은 371년 평양성 전투에서 고구려 고국원왕을 전사시켰다. 백제의 최대 전성기다. 이때 왜에 칠지도도 전달했다.' },
+      { lbl:'선택 B', txt:'중국 동진·왜와 연합해 고구려를 외교적으로 포위한다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+12},
+        res:'고구려를 외교적으로 압박했다. 직접 전쟁 없이도 남진을 막을 수 있었다.',
+        hist:'→ 근초고왕은 동진에 사신을 보내고 왜에 칠지도를 전했다. 군사·외교 동시 전략이었다.' },
+      { lbl:'선택 C', txt:'내부 안정이 먼저다. 마한 복속도 완전하지 않다.',
+        fx:{ms:+10,ip:+5,gn:+5,jj:+5},
+        res:'내부를 다졌다. 영토는 못 넓혔지만 기반이 탄탄해졌다.',
+        hist:'→ 안정적 기반 없는 팽창은 오히려 위험하다.' }
+    ]
+  },
+  {
+    id:'sabi', nation:'bj',
+    era:'6세기, 사비 천도',
+    title:'성왕의 재건 — 사비로 수도를 옮겨라',
+    desc:'무령왕이 중흥의 기반을 만들었다. 성왕은 수도를 웅진(공주)에서 사비(부여)로 옮기려 한다. 사비는 넓은 평야와 강을 끼고 있어 발전에 유리하다. 하지만 두 번째 천도라 백성들이 또 이사해야 한다.',
+    q:'→ 어떻게 결정하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'사비로 천도하고 22부 관청과 5방 지방제를 정비한다.',
+        fx:{ms:+5,ip:+3,gn:+8,jj:-8},
+        res:'사비로 천도했다(538). 중앙 행정과 지방 통치 체계가 정비됐다. 백제 중흥의 발판이 마련됐다.',
+        hist:'→ 성왕의 사비 천도는 백제 재건의 상징이었다. 22부 관청과 5방 지방제도로 행정을 정비했다. 왜에 불교를 전한 것도 성왕 때(552년)다.' },
+      { lbl:'선택 B', txt:'웅진을 유지한다. 잦은 천도는 백성을 지치게 한다.',
+        fx:{ms:+10,ip:+5,gn:0,jj:+5},
+        res:'백성들이 안도했다. 하지만 웅진의 지리적 한계로 더 큰 발전을 이루기 어렵다.',
+        hist:'→ 천도의 피로감은 실재한다. 하지만 사비 천도 없이 백제의 중흥도 없었다.' },
+      { lbl:'선택 C', txt:'천도 전에 신라와 동맹해 고구려를 먼저 공격한다.',
+        fx:{ms:+8,ip:+3,gn:+12,jj:-5},
+        res:'신라와 함께 고구려를 한강 유역에서 몰아냈다. 하지만 신라가 한강 하류를 빼앗을 것이라고는 몰랐다.',
+        hist:'→ 성왕은 신라 진흥왕과 함께 한강을 탈환했지만, 진흥왕이 배신해 한강 하류를 빼앗았다. 성왕은 보복하다가 관산성에서 전사했다(554).' }
+    ]
+  },
+
+  // ─── 신라 추가 ───
+  ,{
+    id:'beopheung', nation:'sr',
+    era:'6세기 초, 신라의 도약',
+    title:'법흥왕의 대개혁',
+    desc:'법흥왕이 즉위했다. 신라는 아직 삼국 중 가장 뒤처져 있다. 율령 반포, 불교 공인, 금관가야 병합을 동시에 추진하려 한다. 하지만 귀족들이 강하게 저항하고 있다. 특히 불교 공인에는 이차돈이 순교할 위기다.',
+    q:'→ 어떻게 추진하겠는가?',
+    choices:[
+      { lbl:'선택 A', txt:'이차돈의 순교를 계기로 불교를 공식화하고 왕권 강화를 선포한다.',
+        fx:{ms:+12,ip:+5,gn:+5,jj:-5},
+        res:'불교 공인을 이루어냈다(527). 왕권이 강화됐다. 귀족들의 저항을 누르는 데 성공했다.',
+        hist:'→ 이차돈이 불교를 위해 목숨을 바쳤고, 그 순교로 오히려 불교 공인이 이루어졌다. 법흥왕은 이를 정치적으로 활용했다.' },
+      { lbl:'선택 B', txt:'불교보다 율령을 먼저 반포해 귀족을 법으로 통제한다.',
+        fx:{ms:+8,ip:+3,gn:+5,jj:+10},
+        res:'520년 율령을 반포하고 17관등제를 정비했다. 귀족의 임의적 권력 행사가 줄었다.',
+        hist:'→ 법흥왕의 율령 반포(520)로 신라 골품제의 기초가 정비됐다. 관복 색도 이때 구분됐다.' },
+      { lbl:'선택 C', txt:'개혁보다 금관가야 병합이 먼저. 영토와 인구를 늘린다.',
+        fx:{ms:+3,ip:+12,gn:+12,jj:+8},
+        res:'금관가야를 병합했다(532). 가야의 철기 기술과 인구를 흡수해 나라가 커졌다.',
+        hist:'→ 금관가야 병합은 신라가 낙동강 유역을 장악하는 전환점이었다. 김수로왕의 후손 김유신도 이때 신라에 편입됐다.' }
+    ]
+  },
+  {
+    id:'jinhung_hangang', nation:'sr',
+    era:'6세기 중반, 진흥왕의 야심',
+    title:'진흥왕 — 한강 하류를 빼앗아라',
+    desc:'백제 성왕과 함께 한강 상류를 고구려로부터 빼앗았다. 한강 하류는 아직 백제가 차지하고 있다. 한강 하류까지 빼앗으면 중국과 직접 교역할 수 있다. 하지만 동맹을 깨면 백제와 적이 된다.',
+    q:'→ 어떻게 할 것인가?',
+    choices:[
+      { lbl:'선택 A', txt:'동맹을 깨고 한강 하류를 백제로부터 빼앗는다.',
+        fx:{ms:-5,ip:+10,gn:+10,jj:+15},
+        res:'한강 전체를 차지했다. 중국과 직접 교역할 수 있게 됐다. 분노한 백제 성왕이 보복 공격에 나섰지만 관산성에서 전사했다(554).',
+        hist:'→ 진흥왕은 동맹을 깨고 한강 하류를 차지했다(553). 이 배신으로 신라는 삼국 통일의 발판을 마련했다. 북한산 순수비가 이때 세워졌다.' },
+      { lbl:'선택 B', txt:'동맹을 유지한다. 신의를 지키는 것이 장기적으로 유리하다.',
+        fx:{ms:+12,ip:+3,gn:+5,jj:+5},
+        res:'백제와의 동맹을 유지했다. 한강 하류는 못 얻었지만 신뢰를 쌓았다.',
+        hist:'→ 단기 이익과 장기 신뢰 사이의 선택. 역사에서 진흥왕은 결국 동맹을 깼다.' },
+      { lbl:'선택 C', txt:'한강보다 가야를 먼저 정복해 낙동강 유역을 장악한다.',
+        fx:{ms:+5,ip:+8,gn:+8,jj:+8},
+        res:'대가야를 비롯한 가야 연맹을 정복했다(562). 낙동강 서쪽을 완전히 장악했다.',
+        hist:'→ 진흥왕의 가야 정복(562)으로 낙동강 서쪽을 차지했다. 단양 신라 적성비, 마운령·황초령 순수비가 영토 확장을 기념한다.' }
+    ]
+  },
+  {
+    id:'gyeolsok', nation:'sr',
+    era:'신라의 독특한 제도',
+    title:'골품제 — 신분이 운명을 정한다',
+    desc:'신라에는 골품제라는 독특한 신분 제도가 있다. 성골·진골·6두품... 태어날 때 신분이 정해지고 오를 수 있는 관등도 정해진다. 유능한 6두품 출신 신하가 있지만 진골이 아니라서 높은 자리를 줄 수 없다.',
+    q:'→ 어떻게 인재를 쓸 것인가?',
+    choices:[
+      { lbl:'선택 A', txt:'골품제를 유지한다. 신분 질서가 무너지면 나라가 혼란해진다.',
+        fx:{ms:+3,ip:0,gn:+5,jj:+5},
+        res:'안정은 유지됐다. 하지만 유능한 인재를 신분 때문에 쓰지 못하는 낭비가 계속된다.',
+        hist:'→ 골품제는 삼국 통일 후에도 유지됐다. 6두품 출신 지식인들의 불만이 신라 말기 혼란의 원인 중 하나가 됐다.' },
+      { lbl:'선택 B', txt:'6두품에게도 실질적 권한을 주는 특별 직책을 만든다.',
+        fx:{ms:+12,ip:+5,gn:+5,jj:+5},
+        res:'유능한 인재들이 실력을 발휘했다. 나라 운영이 효율적이 됐다.',
+        hist:'→ 신라의 화랑도는 골품을 초월한 공동체였다. 제한적이지만 신분을 넘는 능력 발휘의 공간이 있었다.' },
+      { lbl:'선택 C', txt:'골품보다 화랑도 활동 실적으로 인재를 평가한다.',
+        fx:{ms:+10,ip:+3,gn:+12,jj:-3},
+        res:'화랑 출신 인재들이 군사·행정에서 활약했다.',
+        hist:'→ 김유신처럼 가야 출신이라도 화랑도를 통해 능력을 증명하면 높은 자리에 오를 수 있었다.' }
+    ]
+  }
+
+];
+
+// ───────── 게임 로직 ─────────
+
+let state = {};
+const FIXED_COMMON_COUNT = 2; // 공통 이벤트 중 2개는 반드시 포함
+const TOTAL_TURNS = 7;
+
+function startGame(nation) {
+  const nd = NATIONS[nation];
+
+  // 이벤트 구성: 전용 4개 + 공통 3개 (매 플레이마다 랜덤)
+  const exclusivePool = EXCLUSIVE[nation].map(id => ALL_EVENTS.find(e => e.id === id))
+    .sort(() => Math.random() - 0.5).slice(0, 4);
+
+  const commonPool = COMMON_IDS.map(id => ALL_EVENTS.find(e => e.id === id))
+    .sort(() => Math.random() - 0.5).slice(0, 3);
+
+  const events = [...exclusivePool, ...commonPool]
+    .sort(() => Math.random() - 0.5);
+
+  state = {
+    nation,
+    turn: 0,
+    maxTurns: TOTAL_TURNS,
+    stats: { ...INIT_STATS[nation] },
+    log: [],
+    events,
+    commonLog: [] // 공통 이벤트 선택만 따로 저장
+  };
+
+  // 헤더 색
+  document.getElementById('gNation').textContent = nd.name;
+  document.getElementById('gNation').style.color = nd.color;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('game').classList.add('active');
+  document.getElementById('logList').innerHTML = '';
+
+  updateStats();
+  renderEvent();
+}
+
+function updateStats(changes) {
+  const keys = ['ms','ip','gn','jj'];
+  keys.forEach(k => {
+    const v = Math.min(100, Math.max(0, state.stats[k]));
+    state.stats[k] = v;
+    document.getElementById(`v-${k}`).textContent = v;
+    document.getElementById(`b-${k}`).style.width = v + '%';
+    const chg = document.getElementById(`c-${k}`);
+    if (changes && changes[k] !== undefined && changes[k] !== 0) {
+      const s = changes[k] > 0 ? '+' : '';
+      chg.textContent = s + changes[k];
+      chg.style.color = changes[k] > 0 ? '#3A8A2A' : '#8B1A1A';
+    } else {
+      chg.textContent = '';
+    }
+  });
+  const eras = NATIONS[state.nation].eras;
+  const idx = Math.min(Math.floor(state.turn / 1.5), eras.length - 1);
+  document.getElementById('gEra').textContent = eras[idx];
+  document.getElementById('gTurn').textContent = `${state.turn + 1} / ${state.maxTurns} 턴`;
+}
+
+function renderEvent() {
+  if (state.turn >= state.maxTurns) { showEnding(); return; }
+  const ev = state.events[state.turn];
+
+  // 국가 태그
+  const tag = document.getElementById('evNationTag');
+  if (ev.nation === 'common') {
+    tag.textContent = '모든 나라 공통';
+    tag.style.cssText = 'font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:20px;font-weight:700;border:1px solid;background:#FDF5E4;color:#A0722A;border-color:#C8973A';
+  } else {
+    const nd = NATIONS[state.nation];
+    tag.textContent = nd.name + ' 전용';
+    tag.style.cssText = `font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:20px;font-weight:700;border:1px solid;color:${nd.color};border-color:${nd.color};background:${nd.color}18`;
+  }
+
+  document.getElementById('evEra').textContent = ev.era;
+  document.getElementById('evTitle').textContent = ev.title;
+  document.getElementById('evDesc').textContent = ev.desc;
+  document.getElementById('evQ').textContent = ev.q;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  ev.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `
+      <span class="choice-lbl">${c.lbl}</span>
+      <span class="choice-txt">${c.txt}</span>
+      <span class="choice-fx">${fmtFx(c.fx)}</span>
+    `;
+    btn.onclick = () => pick(i);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function fmtFx(fx) {
+  const labels = {ms:'민심',ip:'인구',gn:'군사력',jj:'재정'};
+  return Object.entries(fx).filter(([,v])=>v!==0).map(([k,v])=>`${labels[k]} ${v>0?'+':''}${v}`).join(' · ');
+}
+
+function pick(idx) {
+  const ev = state.events[state.turn];
+  const c = ev.choices[idx];
+
+  // 스탯 적용
+  const applied = {};
+  Object.entries(c.fx).forEach(([k,v]) => {
+    applied[k] = v;
+    state.stats[k] = Math.min(100, Math.max(0, state.stats[k] + v));
+  });
+
+  // 로그
+  const logEntry = { turn: state.turn+1, event: ev.title, choice: c.lbl, choiceTxt: c.txt, evId: ev.id, isCommon: ev.nation === 'common' };
+  state.log.push(logEntry);
+  if (ev.nation === 'common') state.commonLog.push(logEntry);
+
+  addLog(state.turn+1, ev.title, c.lbl);
+  showResult(ev.title, c, applied);
+}
+
+function showResult(evTitle, c, applied) {
+  document.getElementById('popTitle').textContent = evTitle + ' — 결과';
+  document.getElementById('popDesc').textContent = c.res;
+  document.getElementById('popHist').textContent = c.hist;
+
+  const tagsEl = document.getElementById('popTags');
+  tagsEl.innerHTML = '';
+  const labels = {ms:'민심',ip:'인구',gn:'군사력',jj:'재정'};
+  Object.entries(applied).filter(([,v])=>v!==0).forEach(([k,v]) => {
+    const span = document.createElement('span');
+    span.className = `tag ${v>0?'pos':'neg'}`;
+    span.textContent = `${labels[k]} ${v>0?'+':''}${v}`;
+    tagsEl.appendChild(span);
+  });
+
+  updateStats(applied);
+  document.getElementById('overlay').classList.add('show');
+}
+
+function nextTurn() {
+  document.getElementById('overlay').classList.remove('show');
+  state.turn++;
+  if (state.turn >= state.maxTurns) showEnding();
+  else renderEvent();
+}
+
+function addLog(turn, event, choice) {
+  const li = document.createElement('li');
+  li.className = 'log-item';
+  li.innerHTML = `<span class="log-t">${turn}턴</span>${event} — ${choice}`;
+  const list = document.getElementById('logList');
+  list.insertBefore(li, list.firstChild);
+}
+
+function showEnding() {
+  const s = state.stats;
+  const avg = (s.ms + s.ip + s.gn + s.jj) / 4;
+
+  let emoji, title, desc, reflection;
+  if (s.ms < 30) {
+    emoji='💔'; title='민심을 잃은 나라';
+    desc='군사력이 강해도, 재정이 넉넉해도, 백성이 등을 돌리면 나라는 무너진다. 역사 속 수많은 강국이 내부에서 먼저 무너졌다.';
+    reflection='어떤 선택에서 민심이 떨어졌나? 그 선택이 정말 불가피했을까, 아니면 다른 방법이 있었을까? 옆 친구와 비교해봐.';
+  } else if (s.gn < 30) {
+    emoji='🕊'; title='평화롭지만 위태로운 나라';
+    desc='백성들의 삶은 안정됐지만 외부의 위협 앞에 무방비 상태다. 좋은 정치만으로 나라를 지킬 수 없는 시대였다.';
+    reflection='군사력 없이 평화를 유지할 수 있을까? 삼국 시대에 군사력이 왜 그토록 중요했을까?';
+  } else if (avg >= 70) {
+    emoji='🏛'; title='강한 나라의 기틀을 세우다';
+    desc='민심도 잡고 군사력도 키웠다. 백성의 삶과 나라의 힘 사이에서 균형을 잡았다. 삼국 중 하나가 결국 통일에 성공한 이유가 조금 보이지 않는가?';
+    reflection='내가 강한 나라를 만들 수 있었던 결정적 선택은 무엇이었나? 그 선택이 백성의 삶에도 좋았을까, 아니면 나라를 위해 백성이 희생된 걸까?';
+  } else if (avg >= 50) {
+    emoji='⚖'; title='균형을 찾아가는 나라';
+    desc='완벽하지 않지만 나쁘지도 않다. 역사 속 대부분의 나라는 이렇게 흔들리며 앞으로 나아갔다.';
+    reflection='가장 어려웠던 선택은 무엇이었나? 그 순간 백성들은 무슨 생각을 했을까? 다른 나라를 선택한 친구와 같은 이벤트에서 어떤 선택을 했는지 비교해봐.';
+  } else {
+    emoji='🌑'; title='혼란 속의 나라';
+    desc='모든 것을 균형 있게 지키기란 쉽지 않다. 위기는 언제나 찾아온다. 삼국이 수백 년을 버텨낸 것 자체가 대단한 일이다.';
+    reflection='가장 아쉬운 선택은 무엇이었나? 지금 다시 한다면 어떻게 바꾸겠는가? 결과가 나쁜 나라가 역사에서 오래 살아남은 이유는 뭘까?';
+  }
+
+  document.getElementById('endEmoji').textContent = emoji;
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endDesc').textContent = desc;
+  document.getElementById('endRef').textContent = reflection;
+  document.getElementById('e-ms').textContent = s.ms;
+  document.getElementById('e-ip').textContent = s.ip;
+  document.getElementById('e-gn').textContent = s.gn;
+  document.getElementById('e-jj').textContent = s.jj;
+
+  // 공통 이벤트 선택 요약
+  const cs = document.getElementById('csSummary');
+  cs.innerHTML = '';
+  if (state.commonLog.length === 0) {
+    cs.innerHTML = '<div style="font-size:0.78rem;color:var(--ink3)">공통 이벤트가 없었습니다.</div>';
+  } else {
+    state.commonLog.forEach(entry => {
+      const ev = ALL_EVENTS.find(e => e.id === entry.evId);
+      const c = ev?.choices.find(ch => ch.lbl === entry.choice);
+      const row = document.createElement('div');
+      row.className = 'cs-row';
+      row.innerHTML = `
+        <div class="cs-event">📜 ${entry.event}</div>
+        <div class="cs-choice">
+          <span class="cs-choice-lbl">${entry.choice}</span>
+          <span class="cs-choice-txt">${c ? c.txt.slice(0,22)+'…' : ''}</span>
+        </div>
+      `;
+      cs.appendChild(row);
+    });
+  }
+
+  document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active'));
+  document.getElementById('ending').classList.add('active');
+}
+
+function restart() {
+  document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active'));
+  document.getElementById('intro').classList.add('active');
+}
+</script>
+</body>
+</html>
