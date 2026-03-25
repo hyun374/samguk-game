@@ -44,15 +44,7 @@ body {
 }
 
 /* 양피지 질감 배경 */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-}
+
 
 .screen { position: relative; z-index: 1; display: none; min-height: 100vh; }
 .screen.active { display: block; }
@@ -119,6 +111,7 @@ body::before {
   transition: all 0.25s ease;
   text-align: center;
   position: relative;
+  z-index: 2;
   overflow: hidden;
 }
 .nc::after {
@@ -1004,7 +997,7 @@ const ALL_EVENTS = [
   },
 
   // ─── 고구려 추가 ───
-  ,{
+  {
     id:'sosurim', nation:'gg',
     era:'위기 이후의 재건',
     title:'소수림왕의 세 가지 과제',
@@ -1069,7 +1062,7 @@ const ALL_EVENTS = [
   },
 
   // ─── 백제 추가 ───
-  ,{
+  {
     id:'goichiwang', nation:'bj',
     era:'3세기, 체제 정비',
     title:'고이왕의 관료제 — 6좌평 제도',
@@ -1134,7 +1127,7 @@ const ALL_EVENTS = [
   },
 
   // ─── 신라 추가 ───
-  ,{
+  {
     id:'beopheung', nation:'sr',
     era:'6세기 초, 신라의 도약',
     title:'법흥왕의 대개혁',
@@ -1426,3 +1419,4 @@ function restart() {
 </script>
 </body>
 </html>
+
